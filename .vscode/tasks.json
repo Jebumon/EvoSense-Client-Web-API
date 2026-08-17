@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "db-migrate-local-worker",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate:local",
+				"-w",
+				"services/worker"
+			],
+			"isBackground": false
+		}
+	]
+}

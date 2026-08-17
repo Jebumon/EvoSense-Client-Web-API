@@ -1,0 +1,15 @@
+{
+  "name": "@evosensefleet/root",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=@evosensefleet/shared && npm run build --workspace=@evosensefleet/worker",
+    "start": "npm run start --workspace=@evosensefleet/worker",
+    "dev:standalone": "npm run dev:node --workspace=@evosensefleet/worker",
+    "dev:worker": "npm run dev --workspace=@evosensefleet/worker"
+  }
+}

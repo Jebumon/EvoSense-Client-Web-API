@@ -1,0 +1,8 @@
+name = "evosensefleet-worker"
+main = "src/index.ts"
+compatibility_date = "2024-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "evosensefleet-db"
+database_id = "3b9901be-9e44-433d-b2ea-9803c657d9d4"
