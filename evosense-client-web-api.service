@@ -1,18 +1,18 @@
 [Unit]
-Description=EvoSenseFleet Telematics Web API Backend
+Description=EvoSense Client Web API Backend
 After=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/opt/evosensefleet-api
+WorkingDirectory=/opt/evosense-client-web-api
 ExecStart=/usr/bin/node services/worker/dist/server.js
 Restart=always
 RestartSec=5
 Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=HOST=0.0.0.0
-Environment=DATABASE_PATH=/opt/evosensefleet-api/data/evosensefleet.db
+Environment=DATABASE_PATH=/opt/evosense-client-web-api/data/evosense.db
 
 # Resource limits tuned for OCI AMD Micro VM (1GB RAM)
 MemoryMax=500M

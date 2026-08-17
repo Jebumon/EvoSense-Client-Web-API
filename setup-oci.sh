@@ -2,7 +2,7 @@
 set -e
 
 echo "================================================================="
-echo "🚀 EvoSenseFleet Web API - OCI AMD Micro VM Setup & Deployment"
+echo "🚀 EvoSense Client Web API - OCI AMD Micro VM Setup & Deployment"
 echo "================================================================="
 
 # 1. Update OS and install Node.js 22 LTS
@@ -43,27 +43,27 @@ echo "⚙️ [4/5] Setting up systemd service..."
 APP_DIR=$(pwd)
 USER_NAME=$(whoami)
 
-sudo cp evosensefleet-api.service /etc/systemd/system/evosensefleet-api.service
-sudo sed -i "s|/opt/evosensefleet-api|${APP_DIR}|g" /etc/systemd/system/evosensefleet-api.service
-sudo sed -i "s|User=ubuntu|User=${USER_NAME}|g" /etc/systemd/system/evosensefleet-api.service
-sudo sed -i "s|/usr/bin/node|$(which node)|g" /etc/systemd/system/evosensefleet-api.service
+sudo cp evosense-client-web-api.service /etc/systemd/system/evosense-client-web-api.service
+sudo sed -i "s|/opt/evosense-client-web-api|${APP_DIR}|g" /etc/systemd/system/evosense-client-web-api.service
+sudo sed -i "s|User=ubuntu|User=${USER_NAME}|g" /etc/systemd/system/evosense-client-web-api.service
+sudo sed -i "s|/usr/bin/node|$(which node)|g" /etc/systemd/system/evosense-client-web-api.service
 
 sudo systemctl daemon-reload
-sudo systemctl enable evosensefleet-api
-sudo systemctl restart evosensefleet-api
+sudo systemctl enable evosense-client-web-api
+sudo systemctl restart evosense-client-web-api
 
 # 5. Check Service Status
 echo "📊 [5/5] Verifying Web API service status..."
 sleep 2
 
-if sudo systemctl is-active --quiet evosensefleet-api; then
+if sudo systemctl is-active --quiet evosense-client-web-api; then
   echo "================================================================="
-  echo "🎉 SUCCESS! EvoSenseFleet Web API is running on OCI VM."
+  echo "🎉 SUCCESS! EvoSense Client Web API is running on OCI VM."
   echo "📡 Server Port: 3000"
   echo "🌐 Test API Health: curl http://localhost:3000/api/overview"
-  echo "📋 View Logs: sudo journalctl -u evosensefleet-api -f"
+  echo "📋 View Logs: sudo journalctl -u evosense-client-web-api -f"
   echo "================================================================="
 else
   echo "⚠️ Warning: Service did not start cleanly. Check logs with:"
-  echo "   sudo journalctl -u evosensefleet-api --no-pager -n 50"
+  echo "   sudo journalctl -u evosense-client-web-api --no-pager -n 50"
 fi

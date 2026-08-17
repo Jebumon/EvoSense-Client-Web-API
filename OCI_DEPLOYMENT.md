@@ -1,6 +1,6 @@
-# 🚀 EvoSenseFleet Telematics Web API - OCI & MySQL HeatWave Deployment Guide
+# 🚀 EvoSense Client Web API - OCI & MySQL HeatWave Deployment Guide
 
-This guide provides complete instructions for deploying the **EvoSenseFleet Telematics Web API Backend** to an **Oracle Cloud Infrastructure (OCI) Always Free AMD Micro VM** (1/8 OCPU, 1 GB RAM) with support for **OCI MySQL HeatWave Database Service**.
+This guide provides complete instructions for deploying the **EvoSense Client Web API Backend** to an **Oracle Cloud Infrastructure (OCI) Always Free AMD Micro VM** (1/8 OCPU, 1 GB RAM) with support for **OCI MySQL HeatWave Database Service**.
 
 ---
 
@@ -10,7 +10,7 @@ This guide provides complete instructions for deploying the **EvoSenseFleet Tele
 - **Memory Footprint**: ~35MB - 45MB RAM (Ideal for 1 GB RAM Free Tier VM).
 - **Database Engine Options**:
   - **Option A**: Fully-managed **OCI MySQL HeatWave Database Service** (MDS).
-  - **Option B**: Embedded Zero-Dependency SQLite (`./data/evosensefleet.db`) or JSON persistence (`./data/app_state.json`).
+  - **Option B**: Embedded Zero-Dependency SQLite (`./data/evosense.db`) or JSON persistence (`./data/app_state.json`).
 - **Front-end Compatibility**: 100% unchanged API endpoints (`/api/auth/*`, `/api/devices/*`, `/api/telemetry/*`, `/api/overview`, etc.).
 
 ---
@@ -20,8 +20,8 @@ This guide provides complete instructions for deploying the **EvoSenseFleet Tele
 Run this single command on your fresh OCI Ubuntu / Oracle Linux instance:
 
 ```bash
-git clone <your-repository-url> evosensefleet-api
-cd evosensefleet-api
+git clone <your-repository-url> evosense-client-web-api
+cd evosense-client-web-api
 chmod +x setup-oci.sh
 ./setup-oci.sh
 ```
@@ -30,7 +30,7 @@ chmod +x setup-oci.sh
 1. Installs Node.js 22 LTS and build essentials.
 2. Opens Port 3000 in OS firewall (`iptables` / `ufw`).
 3. Installs dependencies and compiles TypeScript monorepo packages.
-4. Registers and starts the `evosensefleet-api` background `systemd` daemon.
+4. Registers and starts the `evosense-client-web-api` background `systemd` daemon.
 
 ---
 
@@ -42,7 +42,7 @@ To migrate to **OCI MySQL HeatWave Database Service (MDS)**:
 1. Log in to the [Oracle Cloud Infrastructure Console](https://cloud.oracle.com).
 2. Go to **Databases** > **MySQL HeatWave** > **DB Systems**.
 3. Click **Create DB System**:
-   - **Name**: `evosensefleet-heatwave`
+   - **Name**: `evosense-client-web-api-db`
    - **Shape**: Select HeatWave or Standalone MySQL shape.
    - **Administrator Credentials**: Username (e.g. `admin`), Password (e.g. `YourSecurePassword123!`).
    - **Networking**: Place it inside your VCN Subnet (e.g. `10.0.1.0/24`).
@@ -70,7 +70,7 @@ MYSQL_SSL=false           # Set to true if SSL/TLS is enforced
 
 ### 4. Restart Web API
 ```bash
-sudo systemctl restart evosensefleet-api
+sudo systemctl restart evosense-client-web-api
 ```
 
 The Web API backend will automatically detect `MYSQL_HOST`, connect to HeatWave, and migrate/hydrate state into the OCI MySQL database!

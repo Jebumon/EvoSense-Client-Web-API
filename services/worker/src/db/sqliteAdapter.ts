@@ -8,7 +8,7 @@ let fallbackStore: Record<string, string> = {};
 function getDbInstance(dbFilePath?: string) {
   if (dbInstance) return dbInstance;
 
-  const targetPath = dbFilePath || process.env.DATABASE_PATH || './data/evosensefleet.db';
+  const targetPath = dbFilePath || process.env.DATABASE_PATH || './data/evosense.db';
   const resolvedPath = path.resolve(targetPath);
   const dir = path.dirname(resolvedPath);
 
