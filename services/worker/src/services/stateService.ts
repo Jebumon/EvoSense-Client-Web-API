@@ -20,7 +20,7 @@ import { cleanupExpiredSessions } from './sessionService';
 const PARENT_COMPANY_ID = 'company-parent';
 
 export function isRelationalPersistenceEnabled(): boolean {
-  return Boolean(process.env.MYSQL_HOST || process.env.USE_MYSQL === 'true');
+  return true;
 }
 
 export async function ensureStateTable(db: D1Like) {
@@ -244,17 +244,9 @@ export async function persistRelationalState(db: D1Like, state: PersistedState) 
   await ensureRelationalTables(db);
 
   const now = new Date().toISOString();
-  const tableNames = ['companies', 'users', 'devices', 'drivers', 'assets', 'alerts', 'events', 'device_events', 'sessions'];
-  for (const table of tableNames) {
-    if (db.exec) {
-      await db.exec(`DELETE FROM ${table}`);
-    } else {
-      await db.prepare(`DELETE FROM ${table}`).bind().run();
-    }
-  }
 
   const replacePayload = async (table: string, id: string, payload: unknown, timestamp: string) => {
-    await db.prepare(`REPLACE INTO ${table} (id, payload, updated_at) VALUES (?, ?, ?)`)
+    await db.prepare(`INSERT INTO ${table} (id, payload, updated_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE payload = VALUES(payload), updated_at = VALUES(updated_at)`)
       .bind(id, JSON.stringify(payload), timestamp)
       .run();
   };
@@ -317,31 +309,7 @@ export async function hydrateStateIfNeeded(c: Context) {
   const db = c.env?.DB as D1Like | undefined;
   if (!db) return;
 
-  if (isRelationalPersistenceEnabled()) {
-    await hydrateRelationalState(db);
-    return;
-  }
-
-  await ensureStateTable(db);
-
-  const row = await db.prepare('SELECT payload FROM app_state WHERE id = 1').bind().first<{ payload: string }>();
-  if (row?.payload) {
-    try {
-      const payload = JSON.parse(row.payload) as PersistedState;
-      restoreState(payload);
-      cleanupExpiredSessions();
-    } catch {
-      // keep in-memory fallback
-    }
-  } else {
-    initializeDatabase();
-    await db.prepare('INSERT INTO app_state (id, payload, updated_at) VALUES (1, ?, ?)').bind(JSON.stringify(snapshotState()), new Date().toISOString()).run();
-  }
-
-  if (users.size === 0) {
-    initializeDatabase();
-    await db.prepare('UPDATE app_state SET payload = ?, updated_at = ? WHERE id = 1').bind(JSON.stringify(snapshotState()), new Date().toISOString()).run();
-  }
+  await hydrateRelationalState(db);
 }
 
 function serializeDeviceJourneyHistory(): Record<string, DeviceJourneyEvent[]> {
