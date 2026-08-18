@@ -1,4 +1,5 @@
 import type { AuthUser, Asset, Company, DeviceJourneyEvent, FleetAlert, FleetEvent, Driver } from '@evosensefleet/shared';
+import type { DeviceRecord } from '../types';
 import { companies } from '../repositories/companyRepository';
 import { users } from '../repositories/userRepository';
 import { devices, drivers, assets } from '../repositories/deviceRepository';

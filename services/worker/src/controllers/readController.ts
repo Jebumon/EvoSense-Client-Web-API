@@ -3,6 +3,7 @@ import type { AuthUser, UserPermission } from '@evosensefleet/shared';
 import { jsonResponse } from '../utils/response';
 import { getUser } from '../services/sessionService';
 import { hasPermission } from '../services/permissionService';
+import { isRelationalPersistenceEnabled } from '../services/stateService';
 import {
   canAccessCompany,
   filterAlertsFor,
@@ -10,7 +11,14 @@ import {
   filterDevicesFor,
   filterDriversFor,
   filterEventsFor,
+  filterAlertsForList,
+  filterAssetsForList,
+  filterCompaniesForList,
+  filterDevicesForList,
+  filterDriversForList,
+  filterEventsForList,
 } from '../services/companyService';
+import { getCompaniesFromDb, getDevicesFromDb, getDriversFromDb, getAssetsFromDb, getAlertsFromDb, getEventsFromDb } from '../services/dbReadService';
 
 type ScopedRequest = { user: AuthUser; companyId?: string } | { error: Response };
 
