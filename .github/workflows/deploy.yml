@@ -33,5 +33,10 @@ jobs:
             npm ci
             npm run build
             npm prune --omit=dev
+            sudo cp evosense-client-web-api.service /etc/systemd/system/evosense-client-web-api.service
+            sudo sed -i "s|/opt/evosense-client-web-api|$HOME/evosense-client-web-api|g" /etc/systemd/system/evosense-client-web-api.service
+            sudo sed -i "s|User=ubuntu|User=$(whoami)|g" /etc/systemd/system/evosense-client-web-api.service
+            sudo sed -i "s|/usr/bin/node|$(which node)|g" /etc/systemd/system/evosense-client-web-api.service
+            sudo systemctl daemon-reload
             sudo systemctl restart evosense-client-web-api.service
             sudo systemctl status evosense-client-web-api.service --no-pager
