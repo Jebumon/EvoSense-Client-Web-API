@@ -30,6 +30,8 @@ jobs:
             cd "$HOME/evosense-client-web-api"
             git fetch https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git main
             git reset --hard FETCH_HEAD
-            npm ci --omit=dev
+            npm ci
+            npm run build
+            npm prune --omit=dev
             sudo systemctl restart evosense-client-web-api.service
             sudo systemctl status evosense-client-web-api.service --no-pager
