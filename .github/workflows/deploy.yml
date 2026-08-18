@@ -27,7 +27,7 @@ jobs:
           key: ${{ secrets.VM2_SSH_KEY }}
           script: |
             set -e
-            cd /evosense-client-web-api
+            cd "$HOME/evosense-client-web-api"
             git fetch https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git main
             git reset --hard FETCH_HEAD
             npm ci --omit=dev
