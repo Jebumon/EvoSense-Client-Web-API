@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Hono } from 'hono';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
