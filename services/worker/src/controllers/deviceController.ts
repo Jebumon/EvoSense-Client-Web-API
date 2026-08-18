@@ -3,37 +3,50 @@ import type { DeviceRecord } from '../types';
 import { jsonResponse } from '../utils/response';
 import { getUser } from '../services/sessionService';
 import { hasPermission } from '../services/permissionService';
-import { filterDevicesFor, filterDeviceEventsFor, canAccessCompany, getCompanyScopeForRequest } from '../services/companyService';
+import { filterDevicesFor, filterDeviceEventsFor, canAccessCompany, getCompanyScopeForRequest, filterDevicesForList, getCompanyScopeForRequestFromList } from '../services/companyService';
 import { getDeviceById, saveDevice, deleteDevice } from '../repositories/deviceRepository';
 import { getCompanyById } from '../repositories/companyRepository';
+import { getCompaniesFromDb, getDevicesFromDb, getDeviceEventsFromDb, getDeviceFromDb } from '../services/dbReadService';
+import { isRelationalPersistenceEnabled } from '../services/stateService';
 import { recordAuditEvent } from '../services/auditService';
 import { persistStateIfEnabled } from '../services/persistenceService';
 import { validateIMEI } from '../utils/validators';
 
-export const getDevicesController = (c: Context) => {
+export const getDevicesController = async (c: Context) => {
   const user = getUser(c);
   if (!user) return jsonResponse({ error: 'Unauthorized' }, 401);
   if (!hasPermission(user, 'devices.view')) return jsonResponse({ error: 'Forbidden: missing devices.view permission' }, 403);
 
   const requestedCompanyId = c.req.query('companyId');
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    const companies = await getCompaniesFromDb(c.env.DB);
+    const devices = await getDevicesFromDb(c.env.DB);
+    return jsonResponse(filterDevicesForList(user, requestedCompanyId ?? undefined, companies, devices));
+  }
+
   return jsonResponse(filterDevicesFor(user, requestedCompanyId ?? undefined));
 };
 
-export const getDeviceController = (c: Context) => {
+export const getDeviceController = async (c: Context) => {
   const user = getUser(c);
   if (!user) return jsonResponse({ error: 'Unauthorized' }, 401);
   if (!hasPermission(user, 'devices.view')) return jsonResponse({ error: 'Forbidden: missing devices.view permission' }, 403);
 
   const id = c.req.param('id');
   if (!id) return jsonResponse({ error: 'Device ID is required' }, 400);
-  const device = getDeviceById(id);
+
+  let device = getDeviceById(id);
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    device = await getDeviceFromDb(c.env.DB, id) ?? device;
+  }
+
   if (!device) return jsonResponse({ error: 'Device not found' }, 404);
   if (!filterDevicesFor(user).includes(device)) return jsonResponse({ error: 'Forbidden for target device' }, 403);
 
   return jsonResponse(device);
 };
 
-export const getDeviceEventsController = (c: Context) => {
+export const getDeviceEventsController = async (c: Context) => {
   const user = getUser(c);
   if (!user) return jsonResponse({ error: 'Unauthorized' }, 401);
   if (!hasPermission(user, 'devices.view')) return jsonResponse({ error: 'Forbidden: missing devices.view permission' }, 403);
@@ -46,6 +59,11 @@ export const getDeviceEventsController = (c: Context) => {
 
   const limitParam = Number(c.req.query('limit') ?? '100');
   const limit = Number.isFinite(limitParam) ? limitParam : 100;
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    const events = await getDeviceEventsFromDb(c.env.DB, device.id);
+    return jsonResponse(events.slice(0, limit));
+  }
+
   return jsonResponse(filterDeviceEventsFor(device.id, limit));
 };
 

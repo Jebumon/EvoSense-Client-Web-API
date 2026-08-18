@@ -27,11 +27,22 @@ function requestScope(c: Context, permission?: UserPermission): ScopedRequest {
   return { user, companyId };
 }
 
-export const getOverviewController = (c: Context) => {
+export const getOverviewController = async (c: Context) => {
   const scope = requestScope(c);
   if ('error' in scope) return scope.error;
-  const devices = filterDevicesFor(scope.user, scope.companyId);
-  const alerts = filterAlertsFor(scope.user, scope.companyId);
+
+  let devices = filterDevicesFor(scope.user, scope.companyId);
+  let alerts = filterAlertsFor(scope.user, scope.companyId);
+
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    const companies = await getCompaniesFromDb(c.env.DB);
+    const devicesDb = await getDevicesFromDb(c.env.DB);
+    const alertsDb = await getAlertsFromDb(c.env.DB);
+
+    devices = filterDevicesForList(scope.user, scope.companyId ?? undefined, companies, devicesDb);
+    alerts = filterAlertsForList(scope.user, scope.companyId ?? undefined, companies, devicesDb, alertsDb);
+  }
+
   return jsonResponse({
     totalVehicles: devices.length,
     onlineVehicles: devices.filter((device) => device.status === 'online').length,
@@ -41,22 +52,55 @@ export const getOverviewController = (c: Context) => {
   });
 };
 
-export const getDriversController = (c: Context) => {
+export const getDriversController = async (c: Context) => {
   const scope = requestScope(c, 'drivers.view');
-  return 'error' in scope ? scope.error : jsonResponse(filterDriversFor(scope.user, scope.companyId));
+  if ('error' in scope) return scope.error;
+
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    const companies = await getCompaniesFromDb(c.env.DB);
+    const drivers = await getDriversFromDb(c.env.DB);
+    return jsonResponse(filterDriversForList(scope.user, scope.companyId ?? undefined, companies, drivers));
+  }
+
+  return jsonResponse(filterDriversFor(scope.user, scope.companyId));
 };
 
-export const getAssetsController = (c: Context) => {
+export const getAssetsController = async (c: Context) => {
   const scope = requestScope(c, 'assets.view');
-  return 'error' in scope ? scope.error : jsonResponse(filterAssetsFor(scope.user, scope.companyId));
+  if ('error' in scope) return scope.error;
+
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    const companies = await getCompaniesFromDb(c.env.DB);
+    const assets = await getAssetsFromDb(c.env.DB);
+    return jsonResponse(filterAssetsForList(scope.user, scope.companyId ?? undefined, companies, assets));
+  }
+
+  return jsonResponse(filterAssetsFor(scope.user, scope.companyId));
 };
 
-export const getAlertsController = (c: Context) => {
+export const getAlertsController = async (c: Context) => {
   const scope = requestScope(c, 'alerts.view');
-  return 'error' in scope ? scope.error : jsonResponse(filterAlertsFor(scope.user, scope.companyId));
+  if ('error' in scope) return scope.error;
+
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    const companies = await getCompaniesFromDb(c.env.DB);
+    const devices = await getDevicesFromDb(c.env.DB);
+    const alerts = await getAlertsFromDb(c.env.DB);
+    return jsonResponse(filterAlertsForList(scope.user, scope.companyId ?? undefined, companies, devices, alerts));
+  }
+
+  return jsonResponse(filterAlertsFor(scope.user, scope.companyId));
 };
 
-export const getEventsController = (c: Context) => {
+export const getEventsController = async (c: Context) => {
   const scope = requestScope(c, 'events.view');
-  return 'error' in scope ? scope.error : jsonResponse(filterEventsFor(scope.user, scope.companyId));
+  if ('error' in scope) return scope.error;
+
+  if (isRelationalPersistenceEnabled() && c.env?.DB) {
+    const companies = await getCompaniesFromDb(c.env.DB);
+    const events = await getEventsFromDb(c.env.DB);
+    return jsonResponse(filterEventsForList(scope.user, scope.companyId ?? undefined, companies, events));
+  }
+
+  return jsonResponse(filterEventsFor(scope.user, scope.companyId));
 };
