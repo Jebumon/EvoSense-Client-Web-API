@@ -95,6 +95,18 @@ export function createSqliteDbAdapter(dbPath?: string): D1Like {
               }
               return null;
             },
+            all: async <T = unknown>(): Promise<T[]> => {
+              if (driver.type === 'node-sqlite' || driver.type === 'better-sqlite3') {
+                try {
+                  const stmt = driver.db.prepare(query);
+                  const rows = stmt.all(...boundArgs);
+                  return (rows as T[]) ?? [];
+                } catch {
+                  return [];
+                }
+              }
+              return [];
+            },
             run: async (): Promise<unknown> => {
               if (driver.type === 'node-sqlite' || driver.type === 'better-sqlite3') {
                 try {

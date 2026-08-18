@@ -20,6 +20,7 @@ export type D1Like = {
   prepare: (query: string) => {
     bind: (...values: unknown[]) => {
       first: <T = unknown>() => Promise<T | null>;
+      all: <T = unknown>() => Promise<T[]>;
       run: () => Promise<unknown>;
     };
   };

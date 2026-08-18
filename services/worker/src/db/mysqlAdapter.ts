@@ -105,6 +105,19 @@ export function createMysqlDbAdapter(): D1Like {
                 return null;
               }
             },
+            all: async <T = unknown>(): Promise<T[]> => {
+              await awaitInit();
+              try {
+                const [rows] = await pool.execute<any[]>(querySql, boundArgs as any[]);
+                if (Array.isArray(rows)) {
+                  return rows as T[];
+                }
+                return [];
+              } catch (err) {
+                console.error('MySQL query error (all):', err);
+                return [];
+              }
+            },
             run: async (): Promise<unknown> => {
               await awaitInit();
               try {
